@@ -3,5 +3,5 @@ project(solitaire_diamond)
 
 set(CMAKE_C_STANDARD 99)
 
-set(SOURCE_FILES main.c)
+set(SOURCE_FILES diamond-41.c)
 add_executable(solitaire_diamond ${SOURCE_FILES})
