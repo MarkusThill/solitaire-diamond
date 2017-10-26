@@ -59,7 +59,7 @@ static const int DIRECTIONS[] = {DOWN, LEFT, UP, RIGHT};
 // the efforts for the backtracking algorithm, since re-occuring positions do not have to
 // be searched twice. Permutations of one move sequence might lead to the same position,
 // which only has to be investigated once.
-static const int HASHSIZE = (1 << 25);
+static const int HASHSIZE = (1 << 27);
 static const int HASHMASK = HASHSIZE - 1;
 static const int HASHMISS = -99;
 

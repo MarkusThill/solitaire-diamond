@@ -28,7 +28,7 @@ The advantage of this arrangement is that all pegs can be easily moved verticall
 
 For example, the remaining number of pegs can be computed with an efficient function that counts the number of set bits in a bit-field. Since we are normally interested to count the remaining pegs after no move is possible any more, there are typically not too many pegs left and the following function computes the number very fast:
 
-```
+```c
 int bitCount(uint64_t x) {
     int c = 0;
     while (x != ZERO) {
@@ -37,7 +37,7 @@ int bitCount(uint64_t x) {
     }
     return c;
 }
-``` 
+```
 
 If only three bits are set in a bit-field, above function would only require 3 iterations in order to count the set bits.
 
@@ -45,26 +45,26 @@ If only three bits are set in a bit-field, above function would only require 3 i
 
 Even more important is the method to compute all the possible moves for a given board position `b`. All possible moves in one direction (in total 4 directions) can simply be computed with:
 
-{% highlight C%}
+```c
 uint64_t mv = rol(rol(b, dir) & BOARD & b, dir) & BOARD & (~b);
-{% endhighlight %}
+```
 
 where `b` is an arbitrary board positon, `rol` is a bitwise rotation left (implemented with some inline assembler), `dir` is the specified direction (+1 for up, -1 for down, +10 for right, -10 for left) and `BOARD` is a bit-mask which masks all 41 holes of the board. The variable `mv` contains all the target holes for the allowed moves in the specified direction.
 After all the possible moves (in `mv`) for a direction `dir` are known, each move can also be performed with a few bitwise operations. We can extract the next move, which should be performed with:
 
-{% highlight C%}
+```c
 // Get next move from all possibilities mv
 uint64_t x = ((mv - 1) ^ mv) & mv;
-{% endhighlight %}
+```
 
 In order to perform the move, we have to set a peg to the target position, we have to remove the "jumped-over" peg and then remove the peg from the old position:
 
-{% highlight C%}
+```c
 // perform move
 b |= x; // set peg at new position
 b &= ~rol(x, -dir); // remove jumped-over peg
 b &= ~rol(x, -2 * dir); // remove  peg from old position
-{% endhighlight %}
+```
 
 Undoing a move can be done accordingly. All of these steps require only a few bitwise operations. A solver with an array-based data structure for the board would likely perform the moves slightly faster, but I suppose that the move generation itself (which is commonly an expensive task) is done much faster with this bit-board design.
 
@@ -74,23 +74,23 @@ It is as simple as that to find all possible moves in one direction. However, I 
 #### Symmetries & Transposition Tables
 When traversing the search tree many positions repeat since permutations of a move sequence can lead to identical positions. Furthermore, the Diamond-41 board is symmetric, having mirror and rotation symmetries. Hence, we can save a lot of computation time if we already know the values of repeating positions and/or of their symmetric equivalents. The value of a position is the minimum number of remaining stones of the final state when an optimal move sequence is performed -- starting from this particular position. For example if we know that position $$b_1$$ has a corresponding value of $$3$$, then a position $$b_2$$, which is identical to $$b_1$$ after rotation, will also have a value of $$3$$. If we had a possibility to store the already known values of positions, then we could save some computation time when we observe a (symmetrically) equivalent position again, by simply retrieving the stored value and returning it. With such an approach, we could prune the search tree significantly and avoid redundant calculations without loosing any information. A common technique used for board games such as chess, checkers, etc., are the so called transposition tables. The idea is to define a suitable hash function which takes the board position (and no historic information of the move sequence which led to this position) and returns a hash value that can be mapped to an index in order to store the game-theoretic value of a position in a hash table. When we observe a new position we can then simply calculate the corresponding hash and check if there is an entry in the hash table. If we find an entry, we are lucky and can stop the search for the current position and cut off the connected sub-tree. If not, then we have to traverse the connected sub tree and then store the retrieved value afterwards in the table. For our problem, an entry in the table could look like this:
 
-{% highlight C %}
+```c
 struct HashElement {
     uint64_t key;
     int value;
 };
-{% endhighlight %}
+```
 
 Since we are not performing an Alpha-Beta search or similar, there is no need to store further information rather than a key and a value. Note that we also have to store a key, which in this case is simply the position itself, since many board positions will map to the same hash table index. This is due to the fact that the hash function itself is typically not injective as well as the modulo operation required to break down the hash value to an index. Since it is not possible to prevent collisions it is always necessary to compare the key of the stored element with the current board position. From this problem another question arises: What do we do, if we want to store a key-value pair in the transposition table, but the corresponding slot is already occupied by another position? The answer for our case is simple: We simply overwrite the older entry in the table. This approach is often sub-optimal, since we might destroy valuable information (especially the values of positions located close to the root node were expensive to compute and could be replaced by those of positions which are very close to a leaf node of the tree), but in our case it still worked decently.
 Commonly, the size of the hash table is chosen to be a power of two, since the modulo operation to map a hash value to an table index turns out to be simply a bitwise AND:
 
-{% highlight C %}
+```c
   int hashIndex = ((int) hash & HASHMASK); // = hash % pow(2,n)
-{% endhighlight %}
+```
 
 where `HASHMASK` is the size of the table minus one ($$2^n - 1$$). One last detail has to be mentioned: How do we define the hash function? Typically, for many board games the so called Zobrist keys are used. These are a clever way to encode a position by XOR-ing (exclusive or) random integers. For each possible move, one random number is generated initially and then used throughout the search. Whenever a move is performed, the current Zobrist key $$Z$$ will be linked by an XOR and the corresponding random number of the move. This approach utilizes the associative and commutative property of the exclusive or as well as the involutory property ($$ x \oplus x = 0 $$ ). In my program I did not use Zobrist keys for reasons of simplicity (but they can also be implemented with relatively small effort). Instead I use a simple hash function of the form
 
-{% highlight C %}
+```c
 /*
  * Function to compute the hash for a 64bit variable. Maybe Zobrist keys would
  * // work better (has to be investigated in future).
@@ -101,7 +101,7 @@ uint64_t getHash(uint64_t x) {
     x = x ^ (x >> 31);
     return x;
 }
-{% endhighlight %}
+```
 
 which is based on [this interesting blog post by David Stafford](http://zimbry.blogspot.de/2011/09/better-bit-mixing-improving-on.html).
 
