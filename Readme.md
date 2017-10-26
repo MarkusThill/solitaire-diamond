@@ -538,7 +538,7 @@ Move: -10, 57
       |x|x|x|
         |x|
 
-Time in minutes: 7.133333
+Time in minutes: 6.133333
 
 Process finished with exit code 0
 ```
