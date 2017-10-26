@@ -3,7 +3,7 @@ You can find a blog post on this on https://www.markusthill.github.io/solving-pe
 Many of us might now the board game peg solitaire and might even have one of its many variants at home. Peg solitaire is a one-player game played on a board with $$n$$ holes and $$n-1$$ pegs. The number of holes depends on the board variant. For example, the English variant consists of 33 holes while the typical diamond variant consists of 41 holes. The rules of the game are rather easy. In each move the player selects one peg and jumps -- either vertically or horizontally, not diagonally -- with this peg over a directly neighboring one into an empty hole. The neighboring peg is then removed, leaving an empty hole. So, in each move, one peg jumps 2 holes further and the peg in-between is removed. Once no move is possible any longer, the game is over. This is the case when there is no pair of pegs which are orthogonally adjacent or if only one peg is left. In the latter case the game is won.
 The English variant, as shown below, has one additional rule: In order to win, it is not sufficient that only one peg is left in the end; this peg also has to be located in the center of the board. The English variant is shown in the figure below.
 
-![English Peg Solitaire](solitaire1.png)
+![English Peg Solitaire](solitaire1.png&s=400)
 
 Even though the rules of the game are rather simple, finding a solution is not trivial. Many players need quite a few attempts in order to find the solution for the English peg solitaire. The solution for the diamond shaped board is even more tricky.
 
