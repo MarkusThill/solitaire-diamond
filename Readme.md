@@ -3,15 +3,13 @@ You can find a blog post on this on https://www.markusthill.github.io/solving-pe
 Many of us might now the board game peg solitaire and might even have one of its many variants at home. Peg solitaire is a one-player game played on a board with $$n$$ holes and $$n-1$$ pegs. The number of holes depends on the board variant. For example, the English variant consists of 33 holes while the typical diamond variant consists of 41 holes. The rules of the game are rather easy. In each move the player selects one peg and jumps -- either vertically or horizontally, not diagonally -- with this peg over a directly neighboring one into an empty hole. The neighboring peg is then removed, leaving an empty hole. So, in each move, one peg jumps 2 holes further and the peg in-between is removed. Once no move is possible any longer, the game is over. This is the case when there is no pair of pegs which are orthogonally adjacent or if only one peg is left. In the latter case the game is won.
 The English variant, as shown below, has one additional rule: In order to win, it is not sufficient that only one peg is left in the end; this peg also has to be located in the center of the board. The English variant is shown in the figure below.
 
-![English Peg Solitaire](solitaire1.png&s=400)
+![English Peg Solitaire](solitaire1.png)
 
 Even though the rules of the game are rather simple, finding a solution is not trivial. Many players need quite a few attempts in order to find the solution for the English peg solitaire. The solution for the diamond shaped board is even more tricky.
 
 
 ## Efficiently Solving the Diamond-41 Board
-As the name suggests, the Diamond-41 board consists of 41 holes. As I was told -- in contrast to the English variant -- the only initial empty hole is not located in the center of the board but has to be placed at a slightly different position in order to be able to solve the game (as I found later, the solver was not able to solve the game for an initially empty hole in the center of the board). The initial position is as follows:
-
-![English Peg Solitaire]({{ site.url }}/slides/peg-solitaire2/Folie01.png){: .image-center width="400px"}
+As the name suggests, the Diamond-41 board consists of 41 holes. As I was told -- in contrast to the English variant -- the only initial empty hole is not located in the center of the board but has to be placed at a slightly different position in order to be able to solve the game (as I found later, the solver was not able to solve the game for an initially empty hole in the center of the board).
 
 In the beginning, only two moves are possible. Since there are many corners on this board it is rather difficult to find a solution where only one peg is left over in the end. Also for backtracking algorithms the computational effort is enormous in order to solve this problem. Without the utilization of some advanced approaches, an algorithm could run for many days until a solution is found.
 
@@ -20,7 +18,7 @@ One major improvement of a classical algorithm can be achieved when instead of a
 
 I designed the following layout for the bit-board representation of the Diamond-41 variant of peg solitaire.
 
-![English Peg Solitaire]({{ site.url }}/slides/peg-solitaire2/0bitboard.png){: .image-center width="400px"}
+![Bitboard](0bitboard.png)
 
 Each number represents the corresponding bit in the bit-board. The center hole is placed at bit 0. The boundary of the board is shown by the squares in above diagram. Moves are not allowed to end up in any of these bits. Note that many boundary bit-numbers appear twice in the diagram. This is due to the special layout, which I will explain in the following. However, it is not necessary to have a separate bit for every point on the boundary, since it is only used to check if a move leaves the board.
 
