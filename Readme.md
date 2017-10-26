@@ -5,7 +5,7 @@ The English variant, as shown below, has one additional rule: In order to win, i
 
 ![English Peg Solitaire](solitaire1.png)
 
-Even though the rules of the game are rather simple, finding a solution is not trivial. Many players need quite a few attempts in order to find the solution for the English peg solitaire. The solution for the diamond shaped board is even more tricky.
+Even though the rules of the game are rather simple, finding a solution is not trivial. Many players need quite a few attempts in order to find the solution for the English peg solitaire. The solution for the diamond shaped board is even more tricky. A simple solver for the English variant can be found in `english.cpp`.
 
 
 ## Efficiently Solving the Diamond-41 Board
