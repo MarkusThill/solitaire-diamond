@@ -1,4 +1,4 @@
-You can find a blog post on this on https://www.markusthill.github.io/solving-peg-solitaire//#read-more
+You can find a blog post on this on https://markusthill.github.io//solving-peg-solitaire//#read-more
 
 Many of us might now the board game peg solitaire and might even have one of its many variants at home. Peg solitaire is a one-player game played on a board with $$n$$ holes and $$n-1$$ pegs. The number of holes depends on the board variant. For example, the English variant consists of 33 holes while the typical diamond variant consists of 41 holes. The rules of the game are rather easy. In each move the player selects one peg and jumps -- either vertically or horizontally, not diagonally -- with this peg over a directly neighboring one into an empty hole. The neighboring peg is then removed, leaving an empty hole. So, in each move, one peg jumps 2 holes further and the peg in-between is removed. Once no move is possible any longer, the game is over. This is the case when there is no pair of pegs which are orthogonally adjacent or if only one peg is left. In the latter case the game is won.
 The English variant, as shown below, has one additional rule: In order to win, it is not sufficient that only one peg is left in the end; this peg also has to be located in the center of the board. The English variant is shown in the figure below.
@@ -70,7 +70,7 @@ Undoing a move can be done accordingly. All of these steps require only a few bi
 It is as simple as that to find all possible moves in one direction. However, I added a few lines of code which allow a better move ordering, which is essential for finding a solution faster. With a standard move ordering the search might take many days. Hence, it might be reasonable to spend some CPU time on sorting the moves a little, in order to try more promising moves first. For example, the move ordering defers moves which end up in the corners of the board, since it is typically not that easy to get out of the corner again. Also some other types of moves are ordered to the back of the list, if they do not appear promising.
 
 #### Symmetries & Transposition Tables
-When traversing the search tree many positions repeat since permutations of a move sequence can lead to identical positions. Furthermore, the Diamond-41 board is symmetric, having mirror and rotation symmetries. Hence, we can save a lot of computation time if we already know the values of repeating positions and/or of their symmetric equivalents. The value of a position is the minimum number of remaining stones of the final state when an optimal move sequence is performed -- starting from this particular position. For example if we know that position $$b_1$$ has a corresponding value of $$3$$, then a position $$b_2$$, which is identical to $$b_1$$ after rotation, will also have a value of $$3$$. If we had a possibility to store the already known values of positions, then we could save some computation time when we observe a (symmetrically) equivalent position again, by simply retrieving the stored value and returning it. With such an approach, we could prune the search tree significantly and avoid redundant calculations without loosing any information. A common technique used for board games such as chess, checkers, etc., are the so called transposition tables. The idea is to define a suitable hash function which takes the board position (and no historic information of the move sequence which led to this position) and returns a hash value that can be mapped to an index in order to store the game-theoretic value of a position in a hash table. When we observe a new position we can then simply calculate the corresponding hash and check if there is an entry in the hash table. If we find an entry, we are lucky and can stop the search for the current position and cut off the connected sub-tree. If not, then we have to traverse the connected sub tree and then store the retrieved value afterwards in the table. For our problem, an entry in the table could look like this:
+When traversing the search tree many positions repeat since permutations of a move sequence can lead to identical positions. Furthermore, the Diamond-41 board is symmetric, having mirror and rotation symmetries. Hence, we can save a lot of computation time if we already know the values of repeating positions and/or of their symmetric equivalents. The value of a position is the minimum number of remaining stones of the final state when an optimal move sequence is performed -- starting from this particular position. For example if we know that position b_1 has a corresponding value of 3 then a position b_2 which is identical to b_1 after rotation, will also have a value of 3 If we had a possibility to store the already known values of positions, then we could save some computation time when we observe a (symmetrically) equivalent position again, by simply retrieving the stored value and returning it. With such an approach, we could prune the search tree significantly and avoid redundant calculations without loosing any information. A common technique used for board games such as chess, checkers, etc., are the so called transposition tables. The idea is to define a suitable hash function which takes the board position (and no historic information of the move sequence which led to this position) and returns a hash value that can be mapped to an index in order to store the game-theoretic value of a position in a hash table. When we observe a new position we can then simply calculate the corresponding hash and check if there is an entry in the hash table. If we find an entry, we are lucky and can stop the search for the current position and cut off the connected sub-tree. If not, then we have to traverse the connected sub tree and then store the retrieved value afterwards in the table. For our problem, an entry in the table could look like this:
 
 ```c
 struct HashElement {
@@ -86,7 +86,7 @@ Commonly, the size of the hash table is chosen to be a power of two, since the m
   int hashIndex = ((int) hash & HASHMASK); // = hash % pow(2,n)
 ```
 
-where `HASHMASK` is the size of the table minus one ($$2^n - 1$$). One last detail has to be mentioned: How do we define the hash function? Typically, for many board games the so called Zobrist keys are used. These are a clever way to encode a position by XOR-ing (exclusive or) random integers. For each possible move, one random number is generated initially and then used throughout the search. Whenever a move is performed, the current Zobrist key $$Z$$ will be linked by an XOR and the corresponding random number of the move. This approach utilizes the associative and commutative property of the exclusive or as well as the involutory property ($$ x \oplus x = 0 $$ ). In my program I did not use Zobrist keys for reasons of simplicity (but they can also be implemented with relatively small effort). Instead I use a simple hash function of the form
+where `HASHMASK` is the size of the table minus one 2^n - 1 One last detail has to be mentioned: How do we define the hash function? Typically, for many board games the so called Zobrist keys are used. These are a clever way to encode a position by XOR-ing (exclusive or) random integers. For each possible move, one random number is generated initially and then used throughout the search. Whenever a move is performed, the current Zobrist key Z will be linked by an XOR and the corresponding random number of the move. This approach utilizes the associative and commutative property of the exclusive or as well as the involutory property. In my program I did not use Zobrist keys for reasons of simplicity (but they can also be implemented with relatively small effort). Instead I use a simple hash function of the form
 
 ```c
 /*
@@ -105,8 +105,440 @@ which is based on [this interesting blog post by David Stafford](http://zimbry.b
 
 #### Finally, the Solution of the Diamond-41 Peg Solitaire Board...
 
-After we put all our components for the solver together, we can finally start running it (the whole source code is listed below). Initially, I ran the solver with a modified termination condition: solutions with $$n$$ (e.g. $$n=5$$) left-over pegs in the final state were also accepted. A solver can find such a solution much faster and can be tested in this way. After everything seemed to work as intended, the solver was started for $$n=1$$ (a solution is searched-for where only one peg remains in the end). Surprisingly, the solver found the solution much faster than expected: After about 6 minutes of computation, an optimal move sequence was found. This move sequence is shown below.
+After we put all our components for the solver together, we can finally start running it (the whole source code is listed below). Initially, I ran the solver with a modified termination condition: solutions with n (e.g. n=5 left-over pegs in the final state were also accepted. A solver can find such a solution much faster and can be tested in this way. After everything seemed to work as intended, the solver was started for n=1 (a solution is searched-for where only one peg remains in the end). Surprisingly, the solver found the solution much faster than expected: After about 6 minutes of computation, an optimal move sequence was found. This move sequence is shown below.
 
 ```c
+/Users/markus/CLionProjects/solitaire-diamond/cmake-build-debug/solitaire_diamond
+Lets start solving the Diamond-41 peg solitaire problem...Move: 10, 13
+        |o|
+      |x|x|o|
+    |o|o|o|o|o|
+  |o|o|o|o|o|o|o|
+|o|o|o|o|o|o|o|o|o|
+  |o|o|o|o|o|o|o|
+    |o|o|o|o|o|
+      |o|o|o|
+        |o|
 
+Move: 1, 3
+        |o|
+      |x|o|o|
+    |o|o|x|o|o|
+  |o|o|o|x|o|o|o|
+|o|o|o|o|o|o|o|o|o|
+  |o|o|o|o|o|o|o|
+    |o|o|o|o|o|
+      |o|o|o|
+        |o|
+
+Move: -10, 1
+        |o|
+      |x|o|o|
+    |o|o|x|o|o|
+  |o|o|o|o|x|x|o|
+|o|o|o|o|o|o|o|o|o|
+  |o|o|o|o|o|o|o|
+    |o|o|o|o|o|
+      |o|o|o|
+        |o|
+
+Move: 1, 21
+        |o|
+      |x|o|o|
+    |o|o|x|o|o|
+  |o|o|o|o|x|o|o|
+|o|o|o|o|o|o|x|o|o|
+  |o|o|o|o|o|x|o|
+    |o|o|o|o|o|
+      |o|o|o|
+        |o|
+
+Move: 10, 19
+        |o|
+      |x|o|o|
+    |o|o|x|o|o|
+  |o|o|o|o|x|o|o|
+|o|o|o|o|o|o|x|o|o|
+  |o|o|o|x|x|o|o|
+    |o|o|o|o|o|
+      |o|o|o|
+        |o|
+
+Move: 1, 63
+        |o|
+      |x|o|o|
+    |o|o|x|o|o|
+  |o|o|o|o|x|o|o|
+|o|o|o|o|o|o|x|o|o|
+  |o|o|o|o|x|o|o|
+    |o|o|x|o|o|
+      |o|x|o|
+        |o|
+
+Move: 10, 62
+        |o|
+      |x|o|o|
+    |o|o|x|o|o|
+  |o|o|o|o|x|o|o|
+|o|o|o|o|o|o|x|o|o|
+  |o|o|o|o|x|o|o|
+    |x|x|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: -1, 52
+        |o|
+      |x|o|o|
+    |o|o|x|o|o|
+  |o|o|o|o|x|o|o|
+|o|o|o|x|o|o|x|o|o|
+  |o|o|x|o|x|o|o|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: -1, 54
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |o|o|x|o|x|o|o|
+|o|o|o|o|o|o|x|o|o|
+  |o|o|x|o|x|o|o|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: 10, 55
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|o|x|o|o|
+|o|o|o|o|o|o|x|o|o|
+  |o|o|x|o|x|o|o|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: 1, 45
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|o|o|o|x|o|o|
+|o|o|x|o|o|o|x|o|o|
+  |o|x|x|o|x|o|o|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: 10, 44
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|o|o|o|x|o|o|
+|x|x|o|o|o|o|x|o|o|
+  |o|x|x|o|x|o|o|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: -1, 43
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|o|x|o|o|
+|x|x|x|o|o|o|x|o|o|
+  |o|o|x|o|x|o|o|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: 10, 53
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|o|x|o|o|
+|x|x|x|o|o|o|x|o|o|
+  |x|x|o|o|x|o|o|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: -10, 9
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|o|x|o|o|
+|x|x|x|o|o|o|x|o|o|
+  |x|x|o|o|o|x|x|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: 10, 19
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|o|x|o|o|
+|x|x|x|o|o|o|x|o|o|
+  |x|x|o|x|x|o|x|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: -1, 63
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|o|x|o|x|o|o|
+  |x|x|o|o|x|o|x|
+    |x|o|o|o|o|
+      |o|x|o|
+        |o|
+
+Move: -1, 61
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|o|x|o|x|o|o|
+  |x|x|o|x|x|o|x|
+    |x|o|x|o|o|
+      |o|o|o|
+        |o|
+
+Move: 1, 62
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|o|x|o|x|o|o|
+  |x|x|o|x|x|o|x|
+    |x|o|o|o|o|
+      |o|x|o|
+        |x|
+
+Move: 1, 9
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|o|x|o|x|o|o|
+  |x|x|o|x|o|o|x|
+    |x|o|o|x|o|
+      |o|x|x|
+        |x|
+
+Move: 10, 8
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|o|x|o|x|o|o|
+  |x|x|o|x|o|o|x|
+    |x|x|x|o|o|
+      |o|x|x|
+        |x|
+
+Move: -1, 52
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|x|x|o|x|o|o|
+  |x|x|x|x|o|o|x|
+    |x|o|x|o|o|
+      |o|x|x|
+        |x|
+
+Move: 1, 53
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|x|x|o|x|o|o|
+  |x|x|o|x|o|o|x|
+    |x|x|x|o|o|
+      |x|x|x|
+        |x|
+
+Move: -10, 62
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|x|x|o|x|o|o|
+  |x|x|o|x|o|o|x|
+    |x|x|o|x|x|
+      |x|x|x|
+        |x|
+
+Move: -1, 8
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|x|x|x|x|o|o|
+  |x|x|o|x|x|o|x|
+    |x|x|o|o|x|
+      |x|x|x|
+        |x|
+
+Move: -10, 52
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|x|x|x|x|o|o|
+  |x|x|o|x|x|o|x|
+    |x|o|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: 1, 54
+        |o|
+      |x|o|o|
+    |o|x|x|o|o|
+  |x|x|o|x|x|o|o|
+|x|x|x|o|x|x|x|o|o|
+  |x|x|x|x|x|o|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: 1, 56
+        |o|
+      |x|o|o|
+    |o|o|x|o|o|
+  |x|x|x|x|x|o|o|
+|x|x|x|x|x|x|x|o|o|
+  |x|x|x|x|x|o|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: 10, 2
+        |o|
+      |x|o|o|
+    |x|x|o|o|o|
+  |x|x|x|x|x|o|o|
+|x|x|x|x|x|x|x|o|o|
+  |x|x|x|x|x|o|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: -10, 20
+        |o|
+      |x|o|o|
+    |x|x|o|o|o|
+  |x|x|x|x|x|o|o|
+|x|x|x|x|x|x|o|x|x|
+  |x|x|x|x|x|o|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: -10, 11
+        |o|
+      |x|o|o|
+    |x|x|o|o|o|
+  |x|x|x|x|o|x|x|
+|x|x|x|x|x|x|o|x|x|
+  |x|x|x|x|x|o|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: 1, 21
+        |o|
+      |x|o|o|
+    |x|x|o|o|o|
+  |x|x|x|x|o|o|x|
+|x|x|x|x|x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: -1, 1
+        |o|
+      |x|x|o|
+    |x|x|x|o|o|
+  |x|x|x|o|o|o|x|
+|x|x|x|x|x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: -10, 2
+        |o|
+      |x|x|o|
+    |x|x|o|x|x|
+  |x|x|x|o|o|o|x|
+|x|x|x|x|x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: 1, 3
+        |o|
+      |x|o|o|
+    |x|x|x|x|x|
+  |x|x|x|x|o|o|x|
+|x|x|x|x|x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: -10, 1
+        |o|
+      |x|o|o|
+    |x|x|x|x|x|
+  |x|x|x|o|x|x|x|
+|x|x|x|x|x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: -1, 2
+        |x|
+      |x|x|o|
+    |x|x|o|x|x|
+  |x|x|x|o|x|x|x|
+|x|x|x|x|x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: 1, 3
+        |x|
+      |x|o|o|
+    |x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+|x|x|x|x|x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Move: -10, 57
+        |x|
+      |o|x|x|
+    |x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+|x|x|x|x|x|x|x|x|x|
+  |x|x|x|x|x|x|x|
+    |x|x|x|x|x|
+      |x|x|x|
+        |x|
+
+Time in minutes: 7.133333
+
+Process finished with exit code 0
 ```
