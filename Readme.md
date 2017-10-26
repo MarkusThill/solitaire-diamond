@@ -1,4 +1,4 @@
-You can find a blog post on this on https://www.markusthill.github.io
+You can find a blog post on this on https://www.markusthill.github.io/solving-peg-solitaire//#read-more
 
 Many of us might now the board game peg solitaire and might even have one of its many variants at home. Peg solitaire is a one-player game played on a board with $$n$$ holes and $$n-1$$ pegs. The number of holes depends on the board variant. For example, the English variant consists of 33 holes while the typical diamond variant consists of 41 holes. The rules of the game are rather easy. In each move the player selects one peg and jumps -- either vertically or horizontally, not diagonally -- with this peg over a directly neighboring one into an empty hole. The neighboring peg is then removed, leaving an empty hole. So, in each move, one peg jumps 2 holes further and the peg in-between is removed. Once no move is possible any longer, the game is over. This is the case when there is no pair of pegs which are orthogonally adjacent or if only one peg is left. In the latter case the game is won.
 The English variant, as shown below, has one additional rule: In order to win, it is not sufficient that only one peg is left in the end; this peg also has to be located in the center of the board. The English variant is shown in the figure below.
@@ -107,7 +107,8 @@ which is based on [this interesting blog post by David Stafford](http://zimbry.b
 
 #### Finally, the Solution of the Diamond-41 Peg Solitaire Board...
 
-After we put all our components for the solver together, we can finally start running it (the whole source code is listed below). Initially, I ran the solver with a modified termination condition: solutions with $$n$$ (e.g. $$n=5$$) left-over pegs in the final state were also accepted. A solver can find such a solution much faster and can be tested in this way. After everything seemed to work as intended, the solver was started for $$n=1$$ (a solution is searched-for where only one peg remains in the end). Surprisingly, the solver found the solution much faster than expected: After about 6 minutes of computation, an optimal move sequence was found. This move sequence is shown in the slideshow below.
+After we put all our components for the solver together, we can finally start running it (the whole source code is listed below). Initially, I ran the solver with a modified termination condition: solutions with $$n$$ (e.g. $$n=5$$) left-over pegs in the final state were also accepted. A solver can find such a solution much faster and can be tested in this way. After everything seemed to work as intended, the solver was started for $$n=1$$ (a solution is searched-for where only one peg remains in the end). Surprisingly, the solver found the solution much faster than expected: After about 6 minutes of computation, an optimal move sequence was found. This move sequence is shown below.
 
-<center><iframe class="slideshow-iframe" src="{{ site.url }}/slides/peg-solitaire2.html"
-style="width:400px" frameborder="0" scrolling="no" onload="resizeIframe(this)"></iframe></center>
+```c
+
+```
