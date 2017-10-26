@@ -72,3 +72,5 @@ cmake-build-debug/CMakeCache.txt
 cmake-build-debug/cmake_install.cmake
 
 a.out
+
+.idea/workspace.xml
